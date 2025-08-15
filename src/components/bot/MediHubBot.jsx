@@ -1,158 +1,162 @@
-import { useState, useEffect } from "react";
-import {
-  GoogleGenerativeAI,
-  HarmCategory,
-  HarmBlockThreshold,
-} from "@google/generative-ai";
+import React, { useState, useEffect } from "react";
 
 function MediHubBot() {
-  const [messages, setMessages] = useState([]);
-  const [userInput, setUserInput] = useState("");
-  const [chat, setChat] = useState(null);
-  const [theme, setTheme] = useState("light");
-  const [error, setError] = useState(null);
+    // État pour la liste des messages, l'entrée utilisateur et l'état de chargement
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-  const API_KEY = "AIzaSyBbu_RjKgoJxDyh40zepQ-4m-hVQ0wh36E";
-  const MODEL_NAME = "gemini-1.0-pro-001";
+    // Clé API Gemini
+    // REMPLACEZ 'YOUR_GEMINI_API_KEY' par votre clé API Gemini réelle.
+    const apiKey = "AIzaSyBbu_RjKgoJxDyh40zepQ-4m-hVQ0wh36E";
 
-  const genAI = new GoogleGenerativeAI(API_KEY);
+    // Fonction pour envoyer un message à l'API Gemini
+    const sendMessageToGemini = async (userMessage) => {
+        setIsLoading(true);
+        setError(null);
 
-  const generationConfig = {
-    temperature: 0.9,
-    topK: 1,
-    topP: 1,
-    maxOutputTokens: 2048,
-  };
+        // Vérifier si la clé API est configurée
+        if (apiKey === "AIzaSyBbu_RjKgoJxDyh40zepQ-4m-hVQ0wh36E") {
+            setIsLoading(false);
+            setError("Veuillez configurer votre clé API Gemini.");
+            return;
+        }
 
-  const safetySettings = [
-    {
-      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-    {
-      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-    },
-  ];
+        // Construire l'historique de conversation pour l'API Gemini
+        const chatHistory = [
+            {
+                role: "system",
+                parts: [{
+                    text: `Tu es MediHub Bot, un assistant médical. 
+                    Si la question est informelle comme "salut" ou "bonjour", réponds de manière informelle et salue l'utilisateur. 
+                    Sinon, tu dois :
+                    - Identifier des maladies basées sur les symptômes fournis par l'utilisateur.
+                    - Lister des médicaments pour ces maladies.
+                    - Si l'utilisateur a des questions médicales générales sur un médicament, fournis les détails.
+                    - Ne pas utiliser d'astérisques (*).
+                    - Générer la réponse sous forme de points clairs sur une nouvelle ligne.`,
+                }],
+            },
+            ...messages.map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.text }]
+            })),
+            { role: 'user', parts: [{ text: userMessage }] }
+        ];
 
-  useEffect(() => {
-    const initChat = async () => {
-      try {
-        const newChat = await genAI
-          .getGenerativeModel({ model: MODEL_NAME })
-          .startChat({
-            generationConfig,
-            safetySettings,
-            history: [
-              ...messages.map((msg) => ({
-                text: msg.text,
-                role: msg.role,
-              })),
-            ],
-          });
-        setChat(newChat);
-      } catch (error) {
-        setError("Failed to initialize chat. Please try again.");
-      }
-    };
-    initChat();
-  }, []);
-
-  const handleSendMessage = async () => {
-    try {
-      const userMessage = {
-        text: userInput,
-        role: "user",
-        timestamp: new Date(),
-      };
-
-      setMessages((prevMessages) => [...prevMessages, userMessage]);
-      setUserInput("");
-
-      if (chat) {
-        const input_prompt = `
-        If ${userInput} is informal like "hi"/"hello" etc ,respond like a general chatbot informally and greet back the user.Else,
-        Identify diseases based on the Symptoms given by the user through ${userInput} and also list medicines for the same.
-        If the user is asking general medical doubts like details of any medicine,etc through ${userInput} provide assistance for the same. 
-        Don't give * in response please.
-        Generate response in proper points on new line.
-        
-        `;
-        const result = await chat.sendMessage(input_prompt);
-        const botMessage = {
-          text: result.response.text(),
-          role: "bot",
-          timestamp: new Date(),
+        // Construire le corps de la requête pour l'API Gemini
+        const payload = {
+            contents: chatHistory,
+            // Paramètres de génération optionnels
+            generationConfig: {
+                temperature: 0.9,
+                maxOutputTokens: 2048,
+            },
         };
 
-        setMessages((prevMessages) => [...prevMessages, botMessage]);
-      }
-    } catch (error) {
-      setError("Failed to send message. Please try again.");
-    }
-  };
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-preview-0520:generateContent?key=${apiKey}`;
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); //prevents adding a new line in input field
-      handleSendMessage();
-    }
-  };
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
 
-  return (
-    <div
-      className={`flex flex-col fixed bottom-24 z-50 left-10 h-[70vh] w-[18.5rem] p-4 shadow-md shadow-emerald-200 z-40 bg-white rounded-t-lg rounded-r-lg`}
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h1 className={`text-2xl font-bold text-dark_theme`}>Medihub Bot</h1>
-      </div>
-      <div className={`flex-1 overflow-y-auto bg-gray-100 rounded-md p-2`}>
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`mb-4 ${
-              msg.role === "user" ? "text-right" : "text-left"
-            }`}
-          >
-            <div
-              className={` px-2 text-xs ${
-                msg.role === "user"
-                  ? `text-white ml-32 p-1 rounded-t-lg rounded-l-lg bg-dark_theme`
-                  : ` bg-light_theme text-gray-800 rounded-b-lg rounded-r-lg`
-              }`}
-            >
-              {msg.text}
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("API Error:", errorData);
+                throw new Error(`Erreur API: ${response.status} - ${JSON.stringify(errorData)}`);
+            }
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0 && result.candidates[0].content) {
+                const botResponse = result.candidates[0].content.parts[0].text;
+                addMessage({ sender: 'bot', text: botResponse });
+            } else {
+                console.error("Réponse inattendue de l'API:", result);
+                addMessage({ sender: 'bot', text: "Désolé, je n'ai pas pu générer de réponse." });
+            }
+        } catch (err) {
+            console.error('Erreur lors de la requête à l\'API Gemini:', err);
+            setError("Oups! Il y a eu une erreur de connexion. Veuillez vérifier votre clé API ou réessayer plus tard.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Gère l'envoi de message par l'utilisateur
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (input.trim() !== '') {
+            addMessage({ sender: 'user', text: input });
+            sendMessageToGemini(input);
+            setInput('');
+        }
+    };
+
+    // Ajoute un message à la liste des messages
+    const addMessage = (message) => {
+        setMessages(prevMessages => [...prevMessages, message]);
+    };
+
+    // Gère la touche "Enter"
+    const handleKeyPress = (e) => {
+        if (e.key === "Enter" && !isLoading) {
+            e.preventDefault();
+            handleSendMessage({ preventDefault: () => {} });
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-screen max-w-lg mx-auto border border-gray-300 rounded-xl overflow-hidden font-sans shadow-lg bg-gray-50">
+            <div className="flex-grow p-4 overflow-y-auto flex flex-col space-y-4">
+                <div className="flex flex-col">
+                    {messages.map((msg, index) => (
+                        <div key={index} className={`flex max-w-[80%] ${msg.sender === 'user' ? 'self-end' : 'self-start'}`}>
+                            <div className={`p-3 rounded-2xl break-words whitespace-pre-wrap shadow-sm leading-tight
+                                ${msg.sender === 'user' 
+                                    ? 'bg-blue-600 text-white rounded-br-md' 
+                                    : 'bg-gray-200 text-gray-800 rounded-bl-md'}`
+                                }>
+                                {msg.text}
+                            </div>
+                        </div>
+                    ))}
+                    {isLoading && (
+                        <div className="flex self-start max-w-[80%]">
+                            <div className="p-3 rounded-2xl break-words whitespace-pre-wrap shadow-sm leading-tight bg-gray-200 text-gray-800 rounded-bl-md animate-pulse">
+                                <span>...</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-          </div>
-        ))}
-      </div>
-      {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
-      <div className="flex items-center mt-4 w-full">
-        <input
-          type="text"
-          placeholder="Type your message..."
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          onKeyDown={handleKeyPress}
-          className={`flex p-2 text-sm rounded-l-md border-t border-b border-l text-black focus:outline-none focus:border-bg-blue-500`}
-        />
-        <button
-          onClick={handleSendMessage}
-          className={`p-2 text-sm bg-dark_theme text-white rounded-r-md hover:bg-opacity-80 focus:outline-none`}
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  );
+            {error && (
+                <div className="bg-red-100 text-red-700 p-3 m-3 rounded-lg text-sm text-center">
+                    {error}
+                </div>
+            )}
+            <form onSubmit={handleSendMessage} className="flex p-4 bg-white border-t border-gray-200">
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Tapez votre message..."
+                    disabled={isLoading}
+                    className="flex-grow border border-gray-300 rounded-full px-4 py-2 mr-3 text-base focus:outline-none focus:border-blue-500"
+                />
+                <button type="submit" disabled={isLoading} className="px-5 py-2 bg-blue-600 text-white font-bold rounded-full text-base transition-colors hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed">
+                    Envoyer
+                </button>
+            </form>
+        </div>
+    );
 }
 
 export default MediHubBot;

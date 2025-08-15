@@ -31,6 +31,7 @@ import {
   FollowedDoctorsPage,
   ChatPage,
   PharmacyStorePage,
+  PatientBookingPage,
 } from "./import-export/ImportExport.js";
 
 // 🔁 Wrapper pour pouvoir utiliser useLocation()
@@ -70,6 +71,7 @@ const AppWrapper = () => {
         <Route path="/message" element={<ChatPage />} />
         <Route path="/pharmacy" element={<PharmacyStorePage />} />
         <Route path="/send-appointment/:doctorId" element={<SendAppointmentPage />} />
+        <Route path="/book"  element={<PatientBookingPage />} />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>
 

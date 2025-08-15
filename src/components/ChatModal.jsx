@@ -15,9 +15,7 @@ const ChatModal = ({ doctor, onClose }) => {
 
   useEffect(() => {
     if (!doctor) return;
-
     socket.emit("join", doctor._id);
-
     API
       .get(`/api/v1/message/${doctor._id}`, {
         withCredentials: true,
@@ -35,13 +33,11 @@ const ChatModal = ({ doctor, onClose }) => {
         setMessages((prev) => [...prev, message]);
       }
     });
-
     return () => socket.off("receiveMessage");
   }, [doctor]);
 
   const handleSend = async () => {
     if (!content.trim()) return;
-
     try {
       const { data } = await API.post(
         "/api/v1/send",
@@ -67,44 +63,50 @@ const ChatModal = ({ doctor, onClose }) => {
           onClick={onClose}
           className="absolute top-2 right-2 text-red-500 hover:text-red-700"
         >
-          <FaTimes size={20} />
+          <FaTimes />
         </button>
-        <h3 className="text-xl font-semibold mb-2">
-          Discuter avec Dr. {doctor.firstName} {doctor.lastName}
-        </h3>
-        <div className="h-64 overflow-y-auto border rounded-md p-3 bg-gray-50 mb-2">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`mb-1 flex ${
-                msg.sender._id === currentUserId ? "justify-end" : "justify-start"
-              }`}
-            >
+
+        <div className="h-96 overflow-y-auto mb-4 p-2 border rounded">
+          {messages.map((message) => {
+            const isCurrentUser = message.sender._id === currentUserId;
+            return (
               <div
-                className={`px-3 py-2 rounded-md text-sm ${
-                  msg.sender._id === currentUserId
-                    ? "bg-emerald-500 text-white"
-                    : "bg-gray-200 text-gray-800"
-                }`}
+                key={message._id}
+                className={`mb-3 flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
               >
-                {msg.content}
+                <div
+                  className={`max-w-xs px-3 py-2 rounded-lg ${
+                    isCurrentUser
+                      ? 'bg-blue-500 text-white ml-auto'
+                      : 'bg-gray-200 text-gray-800 mr-auto'
+                  }`}
+                >
+                  <p className="text-sm">{message.content}</p>
+                  <span className={`text-xs ${isCurrentUser ? 'text-blue-100' : 'text-gray-500'}`}>
+                    {new Date(message.createdAt).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
+
         <div className="flex gap-2">
           <input
             type="text"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Votre message..."
-            className="flex-1 px-3 py-2 border rounded-md"
+            onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Tapez votre message..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             onClick={handleSend}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-md"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
             <FaPaperPlane />
           </button>

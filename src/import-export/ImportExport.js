@@ -75,6 +75,7 @@ import ProfilePage from "../components/profile/ProfilePage.jsx";
 
 import AppointmentLocation from "../components/AppointmentLocation.jsx";
 import SendAppointmentPage from"../components/sendApointement.jsx";
+import PatientBookingPage from "../components/PatientBookingPage.jsx";
 // import OrderedProduct from "../components/CartPage.jsx";
 import Appointment from "../pages/Appointment.jsx";
 import AddtoCart from "../pages/AddtoCart.jsx";
@@ -83,7 +84,7 @@ import PatientAppointmentsPage from "../components/appointment.jsx";
 import SingleMedicine from "../pages/SingleMedicine.jsx";
 
 //! Axios instance
-import axios from "../axios/axios.jsx";
+
 
 
 //! Cusotm hooks
@@ -93,9 +94,12 @@ import useLoading from "../../hooks/useLoading.js";
 import ChatPage from "../components/message.jsx";
 
 export {
-  axios, Navbar, Footer, SkeletonLoading, ErrorPage, HomePage, Hero, WhyUs, Testimonials, AllDoctorsPage, DoctorsCard, SpecialitiesPage, SpecialitiesCard, MedicinesPage, MedicineCard, SearchMedicines, ShopByCategory, ShopByBrand, HotSellers, ShopByDiscount, ProductsByCategory, LoginPage, SignupPage, AboutUsPage, TermsAndConditionsPage, PrivacyPolicyPage, ProductCard, MyPurchasesPage, Appointment, FaqsPage, FaqsCard,
-  AppointmentLocation, AddtoCart, SingleMedicine, GoToTop, Pagination,SendAppointmentPage,
-  Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,FollowedDoctorsPage,ChatPage,PharmacyStorePage,CartPage
+   Navbar, Footer, SkeletonLoading, ErrorPage, HomePage, Hero, WhyUs, Testimonials, AllDoctorsPage, DoctorsCard, SpecialitiesPage, SpecialitiesCard, MedicinesPage,
+    MedicineCard, SearchMedicines, ShopByCategory, ShopByBrand, HotSellers, ShopByDiscount, ProductsByCategory, LoginPage, SignupPage, AboutUsPage, TermsAndConditionsPage,
+     PrivacyPolicyPage, ProductCard, MyPurchasesPage, Appointment, FaqsPage, FaqsCard,
+  AppointmentLocation, AddtoCart, SingleMedicine, GoToTop, Pagination,SendAppointmentPage,PatientBookingPage,
+  Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,
+  FollowedDoctorsPage,ChatPage,PharmacyStorePage,CartPage
 };
 
 
