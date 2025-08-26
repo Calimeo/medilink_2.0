@@ -1,129 +1,156 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import API from "@/axios/axios.js";
-import { toast } from "react-toastify";
 
-/**
- * Page patient : liste les créneaux libres d'un docteur (doctorId param)
- * Permet de réserver un créneau (availabilityId).
- *
- * route example: /book/doctor/:doctorId
- */
+const PatientBookingPage = ({ doctorId: initialDoctorId = '' }) => {
+  const [doctorId, setDoctorId] = useState(initialDoctorId);
+  const [availabilities, setAvailabilities] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
-export default function PatientBookingPage() {
-  const { doctorId } = useParams();
-  const navigate = useNavigate();
-  const [doctor, setDoctor] = useState(null);
-  const [slots, setSlots] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [reason, setReason] = useState("");
-  const [bookingId, setBookingId] = useState(null); // for UX while booking
+  useEffect(() => {
+    if (initialDoctorId) {
+      fetchAvailabilities();
+    }
+  }, [initialDoctorId]);
 
-  const token = localStorage.getItem("token");
+  const fetchAvailabilities = async () => {
+    if (!doctorId) return;
+    setLoading(true);
+    setError('');
+    setSelectedSlot(null);
 
-  const fetchDoctorAndSlots = async () => {
     try {
-      setLoading(true);
-      // fetch doctor info (optional)
-      const [{ data: docResp }, { data: slotsResp }] = await Promise.all([
-        API.get(`/api/v1/user/doctor/${doctorId}`, { headers: { Authorization: `Bearer ${token}` } }).catch(() => ({ data: null })),
-        API.get(`/api/v1/availability/${doctorId}`) // public endpoint for free slots
-      ]);
-      setDoctor(docResp?.doctor || null);
-      setSlots(slotsResp || slotsResp === undefined ? slotsResp : []);
+      const response = await API.get(`/api/v1/availability/${doctorId}`);
+      setAvailabilities(response.data);
     } catch (err) {
-      console.error(err);
-      toast.error("Impossible de récupérer les disponibilités.");
+      console.error("Erreur:", err);
+      setError("Erreur lors de la récupération des disponibilités");
+      toast.error("Erreur lors de la récupération des créneaux");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!doctorId) return;
-    fetchDoctorAndSlots();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doctorId]);
-
-  const handleBook = async (availabilityId) => {
-    if (!reason.trim()) return toast.warn("Indiquez un motif de rendez-vous.");
+  const handleBookSlot = async (slot) => {
+    setBookingLoading(true);
     try {
-      setBookingId(availabilityId);
       const res = await API.post(
-        "/api/v1/appoitment/book",
-        { availabilityId, reason },
-        { headers: { Authorization: `Bearer ${token}` } }
+        "/api/v1/availability/book",
+        { slotId: slot._id, doctorId }, 
+        { withCredentials: true }
       );
-      toast.success(res.data.message || "Réservé !");
-      // mark locally
-      setSlots((prev) => prev.map((s) => (s._id === availabilityId ? { ...s, isBooked: true } : s)));
-      // optionally navigate to "my appointments"
-      navigate("/my-appointments");
+
+      toast.success(res.data.message || "Rendez-vous réservé !");
+      setSelectedSlot(slot);
+
+      // 🔄 Mise à jour de la liste après réservation
+      fetchAvailabilities();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Erreur lors de la réservation");
+      toast.error(err?.response?.data?.message || "Erreur lors de la réservation");
     } finally {
-      setBookingId(null);
+      setBookingLoading(false);
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchAvailabilities();
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-emerald-700">
-              Réserver un rendez-vous
-            </h1>
-            <p className="text-sm text-gray-600">
-              {doctor ? `Dr. ${doctor.firstName} ${doctor.lastName}` : "Sélection du médecin..."}
-            </p>
+    <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
+      {!initialDoctorId && (
+        <>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Disponibilités des médecins</h1>
+          <form onSubmit={handleSubmit} className="mb-8">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label htmlFor="doctorId" className="block text-sm font-medium text-gray-700 mb-1">
+                  ID du médecin
+                </label>
+                <input
+                  type="text"
+                  id="doctorId"
+                  value={doctorId}
+                  onChange={(e) => setDoctorId(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Entrez l'ID du médecin"
+                  required
+                />
+              </div>
+              <div className="self-end">
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  disabled={loading}
+                >
+                  {loading ? 'Chargement...' : 'Rechercher'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </>
+      )}
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {loading && <p className="text-center py-4">Chargement des disponibilités...</p>}
+
+      {availabilities.length > 0 ? (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">
+            {initialDoctorId ? 'Créneaux disponibles' : 'Résultats de recherche'}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {availabilities.map((slot) => (
+              <div 
+                key={slot._id} 
+                className={`p-4 border rounded-lg transition-all ${selectedSlot?._id === slot._id ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200 hover:shadow-md'}`}
+              >
+                <h3 className="font-medium text-gray-900">
+                  {new Date(slot.date).toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long'
+                  })}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {new Date(slot.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+                <div className="mt-3">
+                  <button
+                    className={`px-4 py-2 text-sm rounded transition-colors ${
+                      slot.isBooked
+                        ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                        : 'bg-green-100 text-green-800 hover:bg-green-200'
+                    }`}
+                    disabled={slot.isBooked || bookingLoading}
+                    onClick={() => handleBookSlot(slot)}
+                  >
+                    {slot.isBooked ? 'Déjà réservé' : bookingLoading ? 'Réservation...' : 'Réserver ce créneau'}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
-          <label className="block text-sm text-gray-700 mb-2">Motif du rendez-vous</label>
-          <input
-            type="text"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="Ex : douleurs, consultation..."
-            className="w-full border px-3 py-2 rounded-md"
-          />
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="font-semibold text-gray-800 mb-3">Créneaux disponibles</h2>
-
-          {loading ? (
-            <div className="text-gray-500">Chargement...</div>
-          ) : slots.length === 0 ? (
-            <div className="text-gray-500">Aucun créneau disponible pour le moment.</div>
-          ) : (
-            <div className="grid gap-3">
-              {slots.map((s) => (
-                <div key={s._id} className="flex items-center justify-between border rounded p-3">
-                  <div>
-                    <div className="text-sm font-medium text-gray-700">{new Date(s.date).toLocaleString()}</div>
-                    <div className="text-xs text-gray-500">{s.isBooked ? "Réservé" : "Libre"}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      disabled={s.isBooked || bookingId === s._id}
-                      onClick={() => handleBook(s._id)}
-                      className={`px-4 py-2 rounded-md text-white transition ${
-                        s.isBooked ? "bg-gray-300 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700"
-                      }`}
-                    >
-                      {bookingId === s._id ? "Réservation..." : s.isBooked ? "Indisponible" : "Réserver"}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      ) : (
+        !loading && doctorId && (
+          <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+            <p>Aucune disponibilité trouvée pour ce médecin.</p>
+          </div>
+        )
+      )}
     </div>
   );
-}
+};
+
+export default PatientBookingPage;

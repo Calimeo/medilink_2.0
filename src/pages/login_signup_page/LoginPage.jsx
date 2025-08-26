@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Lottie from "react-lottie";
@@ -13,7 +12,6 @@ function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: "",
   });
 
   const handleInputChange = (e) => {
@@ -26,17 +24,12 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const { email, password, confirmPassword } = formData;
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
+    const { email, password } = formData;
 
     try {
       const response = await API.post(
         "/api/v1/user/login",
-        { email, password, confirmPassword, role: "Patient" },
+        { email, password, role: "Patient" },
         { withCredentials: true }
       );
 
@@ -79,6 +72,7 @@ function LoginPage() {
               name="email"
               id="email"
               placeholder="Enter your email"
+              autoComplete="email"
               value={formData.email}
               onChange={handleInputChange}
               required
@@ -93,21 +87,8 @@ function LoginPage() {
               name="password"
               id="password"
               placeholder="Enter your password"
+              autoComplete="current-password"
               value={formData.password}
-              onChange={handleInputChange}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              id="confirmPassword"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
               onChange={handleInputChange}
               required
               className="w-full border border-gray-300 rounded-lg px-4 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"

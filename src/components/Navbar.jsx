@@ -10,11 +10,17 @@ import {
   FaRegHeart,
   FaUserCircle,
   FaChevronDown,
+  FaSearch, // Ajouté pour l'icône de recherche
+  FaBriefcaseMedical, // Ajouté pour Spécialités
+  FaStethoscope, // Ajouté pour Pharmacie
+  FaCalendarAlt, // Ajouté pour Rendez-vous
+  FaEnvelope, // Ajouté pour Messages
 } from "react-icons/fa";
 import { IoCartOutline } from "react-icons/io5";
 import { LuBox } from "react-icons/lu";
 import { IoIosLogOut } from "react-icons/io";
 import { AuthContext } from "../Context/Context.jsx";
+import logo from "/logo.png";
 
 const Navbar = () => {
   const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
@@ -25,11 +31,11 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const navItems = [
-    { to: "/specialities", label: "Spécialités" },
-    { to: "/pharmacy", label: "Pharmacie" },
-    { to: "/book", label: "Rendez-vous"},
-    { to: "/doctor/search", label: "Recherche" },
-    { to: "/message", label: "Messages" },
+    { to: "/specialities", label: "Spécialités", icon: FaBriefcaseMedical },
+    { to: "/pharmacy", label: "Pharmacie", icon: FaStethoscope },
+    { to: "/booking/doctor", label: "Rendez-vous", icon: FaCalendarAlt },
+    { to: "/doctor/search", label: "Recherche", icon: FaSearch },
+    { to: "/message", label: "Messages", icon: FaEnvelope },
   ];
 
   const dropdownMenus = [
@@ -47,10 +53,10 @@ const Navbar = () => {
   ];
 
   const navLinkClass = ({ isActive }) =>
-    `relative text-sm font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-700 hover:scale-105 ${
-      isActive 
-        ? "text-cyan-700 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-sm" 
-        : "text-gray-700"
+    `relative text-sm font-medium px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 ${
+      isActive
+        ? "text-cyan-700 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-sm"
+        : "text-gray-700 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 hover:text-cyan-700 hover:scale-105"
     }`;
 
   const handleLogOut = () => {
@@ -78,8 +84,12 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4 flex items-center justify-between">
           {/* Logo moderne */}
           <NavLink to="/homepage" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-              <span className="text-white font-bold text-lg">M</span>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden transition-all duration-300 transform group-hover:scale-105">
+              <img
+                src={logo}
+                alt="Logo de l'application"
+                className="w-full h-full object-contain"
+              />
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-green-600 bg-clip-text text-transparent">
               MediLink
@@ -91,6 +101,7 @@ const Navbar = () => {
             {navItems.map((item, i) => (
               <li key={i}>
                 <NavLink to={item.to} className={navLinkClass}>
+                  <item.icon className="text-lg" />
                   {item.label}
                 </NavLink>
               </li>
@@ -100,8 +111,8 @@ const Navbar = () => {
           {/* Actions Desktop */}
           <div className="hidden lg:flex items-center space-x-4">
             {/* Cart */}
-            <div 
-              onClick={handleCartClick} 
+            <div
+              onClick={handleCartClick}
               className="relative cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors group"
             >
               <IoCartOutline className="text-2xl text-gray-600 group-hover:text-cyan-600 transition-colors" />
@@ -140,7 +151,13 @@ const Navbar = () => {
                       }}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 cursor-pointer text-gray-700 hover:text-cyan-700 transition-all duration-200 border-b border-gray-100 last:border-b-0"
                     >
-                      <menu.icon className="text-lg text-cyan-600" />
+                      <menu.icon
+                        className={`text-lg ${
+                          menu.label === "Déconnexion"
+                            ? "text-red-500"
+                            : "text-cyan-600"
+                        }`}
+                      />
                       <span className="font-medium">{menu.label}</span>
                     </div>
                   ))}
@@ -151,10 +168,10 @@ const Navbar = () => {
             {/* Social Links */}
             <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">
               {socialLinks.map((link, i) => (
-                <a 
-                  key={i} 
-                  href={link.to} 
-                  target="_blank" 
+                <a
+                  key={i}
+                  href={link.to}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 text-gray-500 hover:text-cyan-600 rounded-lg hover:bg-gray-50 transition-all duration-200 transform hover:scale-110"
                 >
@@ -182,11 +199,11 @@ const Navbar = () => {
       {isMobileOpen && (
         <>
           {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
             onClick={() => setMobileOpen(false)}
           />
-          
+
           {/* Menu Mobile */}
           <div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl z-50 lg:hidden transform transition-transform duration-300">
             {/* Header du menu mobile */}
@@ -208,7 +225,7 @@ const Navbar = () => {
             {/* Contenu du menu mobile */}
             <div className="p-6 space-y-6 overflow-y-auto h-full pb-20">
               {/* Cart en mobile */}
-              <div 
+              <div
                 onClick={() => {
                   setMobileOpen(false);
                   handleCartClick();
@@ -226,23 +243,26 @@ const Navbar = () => {
                 )}
               </div>
 
-              {/* Navigation Items */}
+              {/* Navigation Items avec icônes */}
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Navigation</h3>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                  Navigation
+                </h3>
                 {navItems.map((item, i) => (
                   <NavLink
                     key={i}
                     to={item.to}
                     onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) => 
-                      `block p-4 rounded-xl transition-all duration-200 font-medium ${
-                        isActive 
-                          ? "bg-gradient-to-r from-cyan-50 to-blue-50 text-cyan-700 shadow-sm" 
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 p-4 rounded-xl transition-all duration-200 font-medium ${
+                        isActive
+                          ? "bg-gradient-to-r from-cyan-50 to-blue-50 text-cyan-700 shadow-sm"
                           : "text-gray-700 hover:bg-gray-50"
                       }`
                     }
                   >
-                    {item.label}
+                    <item.icon className="text-lg text-cyan-600" />
+                    <span>{item.label}</span>
                   </NavLink>
                 ))}
               </div>
@@ -250,7 +270,9 @@ const Navbar = () => {
               {/* User Menu Items */}
               {isAuthenticated && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Mon Compte</h3>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                    Mon Compte
+                  </h3>
                   {dropdownMenus.map((menu, i) => (
                     <div
                       key={i}
@@ -265,7 +287,13 @@ const Navbar = () => {
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <menu.icon className={`text-lg ${menu.label === "Déconnexion" ? "text-red-500" : "text-cyan-600"}`} />
+                      <menu.icon
+                        className={`text-lg ${
+                          menu.label === "Déconnexion"
+                            ? "text-red-500"
+                            : "text-cyan-600"
+                        }`}
+                      />
                       <span className="font-medium">{menu.label}</span>
                     </div>
                   ))}
@@ -289,13 +317,15 @@ const Navbar = () => {
 
               {/* Social Links */}
               <div className="pt-6 border-t border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Suivez-nous</h3>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                  Suivez-nous
+                </h3>
                 <div className="flex justify-center space-x-4">
                   {socialLinks.map((link, i) => (
-                    <a 
-                      key={i} 
-                      href={link.to} 
-                      target="_blank" 
+                    <a
+                      key={i}
+                      href={link.to}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="p-3 bg-gray-100 text-gray-600 hover:text-cyan-600 rounded-xl hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 transition-all duration-200 transform hover:scale-105"
                     >

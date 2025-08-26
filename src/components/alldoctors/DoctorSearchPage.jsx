@@ -5,12 +5,14 @@ import { FaUserPlus, FaUserMinus, FaEnvelope, FaCalendarAlt } from "react-icons/
 import { useNavigate } from "react-router-dom";
 import ChatModal from "../ChatModal.jsx";
 import API from "@/axios/axios.js";
+import PatientBookingPage from "../PatientBookingPage.jsx";
 
 const DoctorSearchPage = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [chatDoctor, setChatDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
   const navigate = useNavigate();
 
   const handleSearch = async (e) => {
@@ -54,8 +56,8 @@ const DoctorSearchPage = () => {
     }
   };
 
-  const handleSendAppointment = (doctorId) => {
-    navigate(`/send-appointment/${doctorId}`);
+  const handleSendAppointment = (doctor) => {
+    setSelectedDoctor(doctor);
   };
 
   return (
@@ -140,7 +142,7 @@ const DoctorSearchPage = () => {
                     </button>
 
                     <button
-                      onClick={() => handleSendAppointment(doctor._id)}
+                      onClick={() => handleSendAppointment(doctor)}
                       className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition"
                     >
                       <FaCalendarAlt className="text-lg" />
@@ -159,6 +161,28 @@ const DoctorSearchPage = () => {
           </p>
         )}
       </div>
+
+      {/* Modal des créneaux disponibles */}
+      {selectedDoctor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white p-4 border-b flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Créneaux disponibles - Dr. {selectedDoctor.firstName} {selectedDoctor.lastName}
+              </h2>
+              <button 
+                onClick={() => setSelectedDoctor(null)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-6">
+              <PatientBookingPage doctorId={selectedDoctor._id} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {chatDoctor && (
         <ChatModal doctor={chatDoctor} onClose={() => setChatDoctor(null)} />

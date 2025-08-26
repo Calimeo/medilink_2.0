@@ -14,8 +14,8 @@ function Hero() {
           <div className="space-y-4 flex items-center flex-col lg:block">
             {/* heading */}
             <h1 className="font-semibold text-3xl md:text-4xl lg:text-5xl text-black/90 tracking-tight">
-              Always caring about your
-              <span className="text-dark_theme ml-4">health</span>
+              Toujours se soucier de votre
+              <span className="text-dark_theme ml-4">santé</span>
             </h1>
 
             {/* para */}
