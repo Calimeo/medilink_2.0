@@ -100,12 +100,10 @@ export {
      PrivacyPolicyPage, ProductCard, MyPurchasesPage, Appointment, FaqsPage, FaqsCard,
   AppointmentLocation, AddtoCart, SingleMedicine, GoToTop, Pagination,SendAppointmentPage,PatientBookingPage,
   Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,
-<<<<<<< HEAD
   FollowedDoctorsPage,ChatPage,PharmacyStorePage,CartPage,PatientDoctorAvailability
  
-=======
-  FollowedDoctorsPage,ChatPage,PharmacyStorePage,CartPage
->>>>>>> e46483ba849f80cb217a0ece5897db334884a5b7
+
+
 };
 
 
