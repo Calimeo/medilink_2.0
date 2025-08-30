@@ -31,9 +31,8 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const navItems = [
-    { to: "/specialities", label: "Spécialités", icon: FaBriefcaseMedical },
+    { to: "/search/hospital", label: "Hopital", icon: FaBriefcaseMedical },
     { to: "/pharmacy", label: "Pharmacie", icon: FaStethoscope },
-    { to: "/booking/doctor", label: "Rendez-vous", icon: FaCalendarAlt },
     { to: "/doctor/search", label: "Recherche", icon: FaSearch },
     { to: "/message", label: "Messages", icon: FaEnvelope },
   ];

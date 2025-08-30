@@ -33,6 +33,7 @@ import {
   PharmacyStorePage,
   PatientBookingPage,
   PatientDoctorAvailability,
+  HospitalList,
 } from "./import-export/ImportExport.js";
 
 // 🔁 Wrapper pour pouvoir utiliser useLocation()
@@ -74,6 +75,7 @@ const AppWrapper = () => {
         <Route path="/send-appointment/:doctorId" element={<SendAppointmentPage />} />
         <Route path="/book"  element={<PatientBookingPage />} />
         <Route path="/booking/doctor" element={<PatientDoctorAvailability />} />
+        <Route path="/search/hospital" element={<HospitalList />} />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>
 

@@ -28,7 +28,7 @@ function Hero() {
           {/* ctas */}
           <div className="space-y-4">
             <NavLink
-              to={"/appointment"}
+              to={"/doctor/search"}
               className="rounded flex items-center px-3 md:px-4 py-3 md:py-4 text-md text-md shadow-md hover:shadow-lg bg-dark_theme hover:bg-main_theme text-text gap-2 md:gap-4"
             >
               <img
