@@ -100,18 +100,11 @@ export {
     MedicineCard, SearchMedicines, ShopByCategory, ShopByBrand, HotSellers, ShopByDiscount, ProductsByCategory, LoginPage, SignupPage, AboutUsPage, TermsAndConditionsPage,
      PrivacyPolicyPage, ProductCard, MyPurchasesPage, Appointment, FaqsPage, FaqsCard,
   AppointmentLocation, AddtoCart, SingleMedicine, GoToTop, Pagination,SendAppointmentPage,PatientBookingPage,
-  Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,
-<<<<<<< HEAD
+  Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,CartPage,ChatPage,HospitalList,PatientDoctorAvailability,
+  PharmacyStorePage,FollowedDoctorsPage,
 
-  FollowedDoctorsPage,ChatPage,PharmacyStorePage,CartPage,PatientDoctorAvailability,HospitalList,
  
 
-=======
-  FollowedDoctorsPage,ChatPage,PharmacyStorePage,CartPage,PatientDoctorAvailability
- 
-
-
->>>>>>> 69e3321c80d635f7df8512307b2a55f94bb541f4
 };
 
 
