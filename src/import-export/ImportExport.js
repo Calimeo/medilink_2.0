@@ -100,7 +100,8 @@ export {
     MedicineCard, SearchMedicines, ShopByCategory, ShopByBrand, HotSellers, ShopByDiscount, ProductsByCategory, LoginPage, SignupPage, AboutUsPage, TermsAndConditionsPage,
      PrivacyPolicyPage, ProductCard, MyPurchasesPage, Appointment, FaqsPage, FaqsCard,
   AppointmentLocation, AddtoCart, SingleMedicine, GoToTop, Pagination,SendAppointmentPage,PatientBookingPage,
-  Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,
+  Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,CartPage,ChatPage,HospitalList,PatientDoctorAvailability,
+  PharmacyStorePage,FollowedDoctorsPage,
 
  
 
