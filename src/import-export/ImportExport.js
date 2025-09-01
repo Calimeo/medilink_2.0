@@ -102,8 +102,8 @@ export {
   AppointmentLocation, AddtoCart, SingleMedicine, GoToTop, Pagination,SendAppointmentPage,PatientBookingPage,
   Bot, useLoading, WhatIsMedihub,ProfilePage,PatientAppointmentsPage,DoctorSearchPage,
 
-
  
+
 };
 
 
