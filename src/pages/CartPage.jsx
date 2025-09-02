@@ -204,49 +204,68 @@ const CartPage = () => {
     }
   };
 
-  const getPaymentMethodLabel = () => {
-    switch(paymentMethod) {
-      case 'credit-card': return 'carte de crédit';
-      case 'paypal': return 'PayPal';
-      case 'bank-transfer': return 'virement bancaire';
-      case 'on-delivery': return 'paiement à la livraison';
-      default: return '';
-    }
-  };
-
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-emerald-700 mb-6">Mon Panier</h1>
+    <div className="max-w-5xl mx-auto p-4 md:p-6">
+      <h1 className="text-2xl md:text-3xl font-bold text-emerald-700 mb-6">Mon Panier</h1>
 
       {cart.length === 0 ? (
-        <p className="text-gray-600">Votre panier est vide.</p>
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">🛒</div>
+          <p className="text-gray-600 text-lg mb-6">Votre panier est vide.</p>
+          <a 
+            href="/pharmacy" 
+            className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors inline-block"
+          >
+            Découvrir nos produits
+          </a>
+        </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {cart.map((item) => (
             <div
               key={item._id}
-              className="flex items-center justify-between border p-4 rounded-md shadow"
+              className="flex flex-col md:flex-row md:items-center justify-between border p-4 rounded-lg shadow-sm bg-white"
             >
-              <div className="flex-1">
+              <div className="flex-1 mb-3 md:mb-0">
                 <h2 className="text-lg font-semibold">{item.name}</h2>
-                <p className="text-sm text-gray-600">{item.description}</p>
+                <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                <p className="text-emerald-600 font-semibold mt-1">
+                  ${item.price} x {item.quantity}
+                </p>
               </div>
 
-              <div className="flex items-center gap-4">
-                <input
-                  type="number"
-                  min="1"
-                  max={item.stock}
-                  value={item.quantity}
-                  onChange={(e) => updateQuantity(item._id, e.target.value)}
-                  className="w-16 border rounded px-2 py-1"
-                />
-                <p className="text-emerald-600 font-semibold">
+              <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4">
+                <div className="flex items-center">
+                  <button 
+                    onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                    className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-l-md border border-gray-300"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max={item.stock}
+                    value={item.quantity}
+                    onChange={(e) => updateQuantity(item._id, e.target.value)}
+                    className="w-12 h-8 border-y border-gray-300 text-center"
+                  />
+                  <button 
+                    onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                    className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-r-md border border-gray-300"
+                  >
+                    +
+                  </button>
+                </div>
+                
+                <p className="text-emerald-600 font-semibold w-20 text-right">
                   ${item.price * item.quantity}
                 </p>
+                
                 <button
                   onClick={() => removeItem(item._id)}
-                  className="text-red-500 font-bold text-xl hover:text-red-700"
+                  className="text-red-500 font-bold text-xl hover:text-red-700 p-2"
+                  aria-label="Supprimer"
                 >
                   ✕
                 </button>
@@ -254,13 +273,13 @@ const CartPage = () => {
             </div>
           ))}
 
-          <div className="flex justify-between items-center mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xl font-bold">
+          <div className="flex flex-col md:flex-row justify-between items-center mt-6 p-4 bg-gray-50 rounded-lg sticky bottom-4 md:static shadow-md">
+            <p className="text-xl font-bold mb-4 md:mb-0">
               Total : <span className="text-emerald-700">${totalAmount}</span>
             </p>
             <button
               onClick={handleCheckout}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-8 rounded-lg font-semibold transition duration-200"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-6 rounded-lg font-semibold transition duration-200 w-full md:w-auto"
             >
               Procéder au paiement
             </button>
@@ -271,16 +290,31 @@ const CartPage = () => {
       {/* Modal de paiement */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Paiement de votre commande</h2>
-            <p className="mb-4 text-lg font-semibold text-emerald-600">
+          <div className="bg-white p-5 md:p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Paiement de votre commande</h2>
+              <button 
+                onClick={() => {
+                  setShowPaymentModal(false);
+                  setPaymentMethod("");
+                  setCardDetails({ cardNumber: "", expiryDate: "", cvv: "", cardHolder: "" });
+                  setBankDetails({ iban: "", bic: "", accountHolder: "" });
+                }}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <p className="mb-4 text-lg font-semibold text-emerald-600 border-b pb-3">
               Total à payer : ${totalAmount}
             </p>
             
             <div className="mb-4">
-              <label className="block mb-2 font-semibold">Méthode de paiement :</label>
-              <div className="space-y-2">
-                <label className="flex items-center p-3 border rounded hover:bg-gray-50 cursor-pointer">
+              <label className="block mb-3 font-semibold">Méthode de paiement :</label>
+              <div className="space-y-3">
+                <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                   <input 
                     type="radio" 
                     name="payment" 
@@ -289,13 +323,17 @@ const CartPage = () => {
                     onChange={() => setPaymentMethod('credit-card')}
                     className="mr-3"
                   />
-                  <div>
+                  <div className="flex items-center">
                     <span className="font-medium">💳 Carte de crédit</span>
-                    <p className="text-sm text-gray-500">Visa, Mastercard, American Express</p>
+                    <div className="ml-2 flex space-x-1">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-6" />
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6" />
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Apple_Pay_logo.svg" alt="Apple Pay" className="h-6" />
+                    </div>
                   </div>
                 </label>
                 
-                <label className="flex items-center p-3 border rounded hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                   <input 
                     type="radio" 
                     name="payment" 
@@ -304,13 +342,13 @@ const CartPage = () => {
                     onChange={() => setPaymentMethod('paypal')}
                     className="mr-3"
                   />
-                  <div>
+                  <div className="flex items-center">
                     <span className="font-medium">📱 PayPal</span>
-                    <p className="text-sm text-gray-500">Paiement sécurisé via PayPal</p>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 ml-2" />
                   </div>
                 </label>
                 
-                <label className="flex items-center p-3 border rounded hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                   <input 
                     type="radio" 
                     name="payment" 
@@ -325,7 +363,7 @@ const CartPage = () => {
                   </div>
                 </label>
                 
-                <label className="flex items-center p-3 border rounded hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                   <input 
                     type="radio" 
                     name="payment" 
@@ -356,7 +394,7 @@ const CartPage = () => {
                     onChange={handleCardInputChange}
                     placeholder="1234 5678 9012 3456"
                     maxLength="19"
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 
@@ -370,7 +408,7 @@ const CartPage = () => {
                       onChange={handleCardInputChange}
                       placeholder="MM/AA"
                       maxLength="5"
-                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -382,7 +420,7 @@ const CartPage = () => {
                       onChange={handleCardInputChange}
                       placeholder="123"
                       maxLength="3"
-                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -395,8 +433,14 @@ const CartPage = () => {
                     value={cardDetails.cardHolder}
                     onChange={handleCardInputChange}
                     placeholder="Nom complet"
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div>
+                
+                <div className="flex items-center justify-center mt-2 space-x-2 opacity-70">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-6" />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6" />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_(2018).svg" alt="American Express" className="h-6" />
                 </div>
               </div>
             )}
@@ -414,7 +458,7 @@ const CartPage = () => {
                     value={bankDetails.iban}
                     onChange={handleBankInputChange}
                     placeholder="FR76 1234 5678 9012 3456 7890 123"
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 
@@ -426,7 +470,7 @@ const CartPage = () => {
                     value={bankDetails.bic}
                     onChange={handleBankInputChange}
                     placeholder="ABCDEFGHXXX"
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 
@@ -438,7 +482,7 @@ const CartPage = () => {
                     value={bankDetails.accountHolder}
                     onChange={handleBankInputChange}
                     placeholder="Nom complet"
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -446,7 +490,8 @@ const CartPage = () => {
 
             {/* Messages informatifs */}
             {paymentMethod === 'paypal' && (
-              <div className="mb-4 p-4 border rounded-lg bg-yellow-50">
+              <div className="mb-4 p-4 border rounded-lg bg-yellow-50 flex items-start">
+                <div className="mr-3 text-yellow-600 text-xl">ℹ️</div>
                 <p className="text-sm text-yellow-700">
                   Vous serez redirigé vers PayPal pour finaliser votre paiement de manière sécurisée.
                 </p>
@@ -454,14 +499,15 @@ const CartPage = () => {
             )}
 
             {paymentMethod === 'on-delivery' && (
-              <div className="mb-4 p-4 border rounded-lg bg-blue-50">
+              <div className="mb-4 p-4 border rounded-lg bg-blue-50 flex items-start">
+                <div className="mr-3 text-blue-600 text-xl">ℹ️</div>
                 <p className="text-sm text-blue-700">
                   Vous paierez en espèces ou par carte bancaire lorsque vous recevrez votre commande.
                 </p>
               </div>
             )}
             
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex flex-col-reverse md:flex-row justify-end space-y-reverse space-y-3 md:space-y-0 md:space-x-3 pt-4">
               <button 
                 onClick={() => {
                   setShowPaymentModal(false);
@@ -469,17 +515,25 @@ const CartPage = () => {
                   setCardDetails({ cardNumber: "", expiryDate: "", cvv: "", cardHolder: "" });
                   setBankDetails({ iban: "", bic: "", accountHolder: "" });
                 }}
-                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition"
+                className="bg-gray-200 px-5 py-3 rounded-lg hover:bg-gray-300 transition font-medium"
                 disabled={loading}
               >
                 Annuler
               </button>
               <button 
                 onClick={confirmPayment}
-                disabled={loading}
-                className="bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700 transition font-semibold disabled:opacity-50"
+                disabled={loading || !paymentMethod}
+                className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition font-semibold disabled:opacity-50 flex items-center justify-center"
               >
-                {loading ? "Traitement..." : `Payer ${totalAmount}€`}
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Traitement...
+                  </>
+                ) : `Payer ${totalAmount}€`}
               </button>
             </div>
           </div>
