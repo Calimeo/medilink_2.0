@@ -53,7 +53,7 @@ function LoginPage() {
         localStorage.setItem("user", JSON.stringify(response.data.user));
         
         toast.success("🎉 Login successful! Welcome back!");
-        setTimeout(() => navigate("/homepage"), 1000);
+        setTimeout(() => navigate("/homepage"), 50000);
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
